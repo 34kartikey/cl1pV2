@@ -2,11 +2,11 @@ name = "cl1p"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "./dist"
 
+
 [[d1_databases]]
 binding = "DB"
 database_name = "cl1p-db"
-# Run: wrangler d1 create cl1p-db  → paste the returned database_id here
-database_id = "YOUR_D1_DATABASE_ID"
+database_id = "13fbb1e9-bb76-4345-9a21-235dfb0fa6c3"
 
 [[r2_buckets]]
 binding = "FILES"

@@ -84,7 +84,7 @@ export default function ClipViewer({ clip, slug, readPassword = null, onRefresh 
     for (const nf of newFiles) {
       const reg = await registerFile(slug, { fileId: nf.id, filename: nf.filename, mime_type: nf.mime_type, size_bytes: nf.size_bytes }, wp)
       if (!reg.ok) continue
-      await uploadFile(slug, nf.id, nf.file, p => setNewFiles(prev => prev.map(f => f.id === nf.id ? { ...f, progress: p, status: 'uploading' } : f)))
+      await uploadFile(slug, nf.id, nf.file, p => setNewFiles(prev => prev.map(f => f.id === nf.id ? { ...f, progress: p, status: 'uploading' } : f)), wp)
     }
     setSaving(false); setIsEditing(false)
     if (onRefresh) onRefresh(wp)

@@ -133,10 +133,8 @@ export async function onRequestPut({ params, env, request }) {
     return err('Clip not found', 404);
   }
 
-  // Write-auth check
-  if (clip.edit_mode === 'read_only') {
-    return err('This clip is read-only', 403);
-  }
+  // Write-auth check — read_only clips allow the initial creation upload but not edits.
+  // Password-protected clips require the write password on every upload.
   if (clip.edit_mode === 'password') {
     const provided = request.headers.get('x-write-password');
     if (!provided) return err('Write password required', 401);

@@ -112,8 +112,9 @@ export default function CreateForm({ slug, onCreated }) {
 
     if (files.length > 0) {
       setFiles(prev => prev.map(f => ({ ...f, status: 'uploading', progress: 0 })))
+      const wp = (editMode === 'owner' && writePassword.trim()) ? writePassword.trim() : null
       await Promise.all(files.map(async fi => {
-        const up = await uploadFile(finalSlug, fi.id, fi.file, p => setFiles(prev => prev.map(f => f.id === fi.id ? { ...f, progress: p, status: 'uploading' } : f)))
+        const up = await uploadFile(finalSlug, fi.id, fi.file, p => setFiles(prev => prev.map(f => f.id === fi.id ? { ...f, progress: p, status: 'uploading' } : f)), wp)
         setFiles(prev => prev.map(f => f.id === fi.id ? { ...f, status: up.ok ? 'done' : 'error', progress: up.ok ? 100 : f.progress, errorMessage: up.error } : f))
       }))
     }

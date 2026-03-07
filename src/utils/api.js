@@ -73,11 +73,12 @@ export async function createClip(slug, payload) {
  * @param {function} onProgress - called with 0-100
  * Returns { ok: true } or { ok: false, error }
  */
-export async function uploadFile(slug, fileId, file, onProgress) {
+export async function uploadFile(slug, fileId, file, onProgress, writePassword = null) {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest()
     xhr.open('PUT', `${BASE}/clips/${encodeURIComponent(slug)}/files/${encodeURIComponent(fileId)}`)
     xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
+    if (writePassword) xhr.setRequestHeader('x-write-password', writePassword)
 
     xhr.upload.addEventListener('progress', (e) => {
       if (e.lengthComputable) {

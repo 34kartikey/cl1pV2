@@ -1,0 +1,16 @@
+name = "cl1p-cleanup"
+main = "scheduled.js"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cl1p-db"
+# Run: wrangler d1 create cl1p-db  → paste the returned database_id here
+database_id = "YOUR_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "cl1p-files"
+
+[triggers]
+crons = ["0 * * * *"]

@@ -153,9 +153,9 @@ export default function CreateForm({ slug, onCreated }) {
               </div>
             </div>
             <div>
-              <label style={label}>Privacy</label>
+              <label style={label}>Who can view?</label>
               <SegmentControl
-                options={[{ label: 'Public', value: true }, { label: 'Private', value: false }]}
+                options={[{ label: 'Anyone', value: true }, { label: 'Password only', value: false }]}
                 value={isPublic} onChange={setIsPublic}
               />
               {!isPublic && (
@@ -166,9 +166,9 @@ export default function CreateForm({ slug, onCreated }) {
               )}
             </div>
             <div>
-              <label style={label}>Editability</label>
+              <label style={label}>Who can edit?</label>
               <SegmentControl
-                options={[{ label: 'Read-only', value: 'none' }, { label: 'Everyone', value: 'public' }, { label: 'Owner', value: 'owner' }]}
+                options={[{ label: 'No one', value: 'none' }, { label: 'Anyone', value: 'public' }, { label: 'With password', value: 'owner' }]}
                 value={editMode} onChange={setEditMode}
               />
               {editMode === 'owner' && (

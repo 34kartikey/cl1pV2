@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Plus, Upload, Clock, FileText } from 'lucide-react'
+import { Plus, Upload, Clock, FileText, Eye, EyeOff } from 'lucide-react'
 import { createClip, uploadFile } from '../utils/api.js'
 import { detectLanguage, highlight, languageLabel, LANGUAGE_OPTIONS } from '../utils/language.js'
 import FileUploadZone from './FileUploadZone.jsx'
@@ -66,6 +66,8 @@ export default function CreateForm({ slug, onCreated }) {
   const [customDatetime, setCustomDatetime] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(null)
+  const [showReadPw, setShowReadPw] = useState(false)
+  const [showWritePw, setShowWritePw] = useState(false)
 
   useEffect(() => {
     clearTimeout(detectTimer.current)
@@ -156,7 +158,12 @@ export default function CreateForm({ slug, onCreated }) {
                 options={[{ label: 'Public', value: true }, { label: 'Private', value: false }]}
                 value={isPublic} onChange={setIsPublic}
               />
-              {!isPublic && <input type="password" placeholder="View password (required to open this cl1p)" value={readPassword} onChange={e => setReadPassword(e.target.value)} autoComplete="new-password" style={{ ...inputS, marginTop: '10px' }} onFocus={onFI} onBlur={onBI} />}
+              {!isPublic && (
+                <div style={{ position: 'relative', marginTop: '10px' }}>
+                  <input type={showReadPw ? 'text' : 'password'} placeholder="View password (required to open this cl1p)" value={readPassword} onChange={e => setReadPassword(e.target.value)} autoComplete="new-password" style={{ ...inputS, padding: '8px 40px 8px 12px' }} onFocus={onFI} onBlur={onBI} />
+                  <button type="button" onClick={() => setShowReadPw(v => !v)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', display: 'flex', padding: 0 }}>{showReadPw ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+                </div>
+              )}
             </div>
             <div>
               <label style={label}>Editability</label>
@@ -164,7 +171,12 @@ export default function CreateForm({ slug, onCreated }) {
                 options={[{ label: 'Read-only', value: 'none' }, { label: 'Everyone', value: 'public' }, { label: 'Owner', value: 'owner' }]}
                 value={editMode} onChange={setEditMode}
               />
-              {editMode === 'owner' && <input type="password" placeholder="Edit password (required to make changes)" value={writePassword} onChange={e => setWritePassword(e.target.value)} autoComplete="new-password" style={{ ...inputS, marginTop: '10px' }} onFocus={onFI} onBlur={onBI} />}
+              {editMode === 'owner' && (
+                <div style={{ position: 'relative', marginTop: '10px' }}>
+                  <input type={showWritePw ? 'text' : 'password'} placeholder="Edit password (required to make changes)" value={writePassword} onChange={e => setWritePassword(e.target.value)} autoComplete="new-password" style={{ ...inputS, padding: '8px 40px 8px 12px' }} onFocus={onFI} onBlur={onBI} />
+                  <button type="button" onClick={() => setShowWritePw(v => !v)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', display: 'flex', padding: 0 }}>{showWritePw ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+                </div>
+              )}
             </div>
           </div>
         </div>

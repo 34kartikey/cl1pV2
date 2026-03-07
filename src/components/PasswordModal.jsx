@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { X } from 'lucide-react'
+import { X, Eye, EyeOff } from 'lucide-react'
 
 export default function PasswordModal({ slug, error, onSubmit, inline = false, onCancel, promptLabel = 'View password' }) {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPw, setShowPw] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -32,11 +33,16 @@ export default function PasswordModal({ slug, error, onSubmit, inline = false, o
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <div>
           <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px' }}>Password</label>
-          <input type="password" placeholder={promptLabel} value={password} onChange={e => setPassword(e.target.value)} autoFocus autoComplete="current-password"
-            style={{ display: 'block', width: '100%', padding: '8px 12px', fontSize: '13px', border: '1px solid var(--border)', borderRadius: '6px', outline: 'none', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'inherit', transition: 'box-shadow 150ms, border-color 150ms' }}
-            onFocus={e => { e.target.style.boxShadow = '0 0 0 2px rgba(0,0,0,0.1)'; e.target.style.borderColor = '#000' }}
-            onBlur={e => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = 'var(--border)' }}
-          />
+          <div style={{ position: 'relative' }}>
+            <input type={showPw ? 'text' : 'password'} placeholder={promptLabel} value={password} onChange={e => setPassword(e.target.value)} autoFocus autoComplete="current-password"
+              style={{ display: 'block', width: '100%', padding: '8px 40px 8px 12px', fontSize: '13px', border: '1px solid var(--border)', borderRadius: '6px', outline: 'none', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'inherit', transition: 'box-shadow 150ms, border-color 150ms' }}
+              onFocus={e => { e.target.style.boxShadow = '0 0 0 2px rgba(0,0,0,0.1)'; e.target.style.borderColor = '#000' }}
+              onBlur={e => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = 'var(--border)' }}
+            />
+            <button type="button" onClick={() => setShowPw(v => !v)}
+              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', display: 'flex', padding: 0 }}
+            >{showPw ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+          </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
           {onCancel && (

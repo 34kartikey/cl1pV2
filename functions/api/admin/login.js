@@ -6,7 +6,7 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json() } catch { return json({ success: false, error: 'Invalid JSON' }, 400, cors) }
 
   const { password } = body
-  if (!password || password !== env.ADMIN_PASSWORD) {
+  if (!password || password.trim() !== (env.ADMIN_PASSWORD || '').trim()) {
     return json({ success: false, error: 'Invalid password' }, 401, cors)
   }
 

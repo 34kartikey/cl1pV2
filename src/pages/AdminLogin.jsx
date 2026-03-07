@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Lock } from 'lucide-react'
+import { Lock, Eye, EyeOff } from 'lucide-react'
 import { adminLogin, saveToken } from '../utils/adminApi.js'
 
 export default function AdminLogin() {
   const [password, setPassword] = useState('')
+  const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -42,16 +43,21 @@ export default function AdminLogin() {
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: 'var(--text)' }}>
                 Admin Password
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="Enter admin password"
-                autoFocus
-                style={{ display: 'block', width: '100%', padding: '9px 12px', fontSize: '13px', border: '1px solid var(--border)', borderRadius: '6px', outline: 'none', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'inherit', transition: 'box-shadow 150ms, border-color 150ms' }}
-                onFocus={e => { e.target.style.boxShadow = '0 0 0 2px rgba(0,0,0,0.1)'; e.target.style.borderColor = '#000' }}
-                onBlur={e => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = 'var(--border)' }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Enter admin password"
+                  autoFocus
+                  style={{ display: 'block', width: '100%', padding: '9px 40px 9px 12px', fontSize: '13px', border: '1px solid var(--border)', borderRadius: '6px', outline: 'none', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'inherit', transition: 'box-shadow 150ms, border-color 150ms' }}
+                  onFocus={e => { e.target.style.boxShadow = '0 0 0 2px rgba(0,0,0,0.1)'; e.target.style.borderColor = '#000' }}
+                  onBlur={e => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = 'var(--border)' }}
+                />
+                <button type="button" onClick={() => setShowPw(v => !v)}
+                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', display: 'flex', padding: 0 }}
+                >{showPw ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+              </div>
             </div>
 
             {error && (

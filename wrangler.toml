@@ -11,3 +11,7 @@ database_id = "13fbb1e9-bb76-4345-9a21-235dfb0fa6c3"
 [[r2_buckets]]
 binding = "FILES"
 bucket_name = "cl1p-files"
+
+# Admin secrets — set via Cloudflare dashboard → Pages → cl1p → Settings → Variables and Secrets
+# or run:  wrangler pages secret put ADMIN_PASSWORD
+#          wrangler pages secret put ADMIN_SECRET

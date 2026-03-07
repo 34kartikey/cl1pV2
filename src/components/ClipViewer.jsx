@@ -107,8 +107,8 @@ export default function ClipViewer({ clip, slug, readPassword = null, onRefresh 
               : { icon: KeyRound, label: 'Owner edit' },
             formatExpiry(expires_at) ? { icon: Clock, label: formatExpiry(expires_at) } : null,
           ].filter(Boolean).map(({ icon: Icon, label }, i) => (
-            <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#4b5563', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '3px 10px', fontWeight: 500 }}>
-              <Icon size={12} strokeWidth={2} />{label}
+            <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#374151', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '5px 12px', fontWeight: 600 }}>
+              <Icon size={13} strokeWidth={2} />{label}
             </span>
           ))}
         </div>

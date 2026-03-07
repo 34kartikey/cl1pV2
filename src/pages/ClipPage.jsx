@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { Copy, Check } from 'lucide-react'
+import QRCode from 'react-qr-code'
 import { getClip } from '../utils/api.js'
 import ClipViewer from '../components/ClipViewer.jsx'
 import CreateForm from '../components/CreateForm.jsx'
@@ -41,23 +42,22 @@ export default function ClipPage() {
   return (
     <div style={{ minHeight: '100vh', padding: '32px 24px', maxWidth: '860px', margin: '0 auto' }}>
 
-      {/* Slug heading + copy — only when clip exists or loading/error, not on create form */}
-      {state !== 'not-found' && <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '28px' }}>
-        <div onClick={copyUrl} style={{ display: 'flex', alignItems: 'center', height: '38px', padding: '0 16px', background: 'transparent', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '13px', color: 'var(--text-2)', cursor: 'pointer', transition: 'all 150ms' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = '#000' }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)' }}
-        >
-          <strong style={{ color: 'var(--text)' }}>{window.location.href}</strong>
+      {/* QR code + copy — only when clip exists, not on create form */}
+      {state === 'exists' && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '28px' }}>
+          <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '10px', padding: '14px', display: 'inline-block' }}>
+            <QRCode value={window.location.href} size={140} />
+          </div>
+          <button onClick={copyUrl}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', height: '38px', width: '168px', background: copied ? 'var(--success)' : '#000', color: '#fff', border: 'none', borderRadius: '8px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, cursor: 'pointer', transition: 'all 150ms', whiteSpace: 'nowrap' }}
+            onMouseEnter={e => { if (!copied) e.currentTarget.style.opacity = '0.85' }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+          >
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+            {copied ? 'Copied!' : 'Copy link'}
+          </button>
         </div>
-        <button onClick={copyUrl}
-          style={{ display: 'flex', alignItems: 'center', gap: '7px', height: '38px', padding: '0 16px', background: 'transparent', color: copied ? 'var(--success)' : 'var(--text-2)', border: '1px solid var(--border)', borderRadius: '8px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, cursor: 'pointer', transition: 'all 150ms', whiteSpace: 'nowrap' }}
-          onMouseEnter={e => { if (!copied) { e.currentTarget.style.borderColor = '#000'; e.currentTarget.style.color = 'var(--text)' }}}
-          onMouseLeave={e => { if (!copied) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-2)' }}}
-        >
-          {copied ? <Check size={14} /> : <Copy size={14} />}
-          {copied ? 'Copied!' : 'Copy link'}
-        </button>
-      </div>}
+      )}
 
       {state === 'loading' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '64px 0', color: 'var(--text-2)', fontSize: '13px' }}>

@@ -68,6 +68,7 @@ export default function CreateForm({ slug, onCreated }) {
   const [submitError, setSubmitError] = useState(null)
   const [showReadPw, setShowReadPw] = useState(false)
   const [showWritePw, setShowWritePw] = useState(false)
+  const [showPasswordWarning, setShowPasswordWarning] = useState(false)
 
   useEffect(() => {
     clearTimeout(detectTimer.current)
@@ -90,6 +91,16 @@ export default function CreateForm({ slug, onCreated }) {
       setSubmitError(`Total file size exceeds 50 MB (currently ${(totalSize / 1024 / 1024).toFixed(1)} MB). Please remove some files.`)
       return
     }
+    const needsReadPw = !isPublic && !readPassword.trim()
+    const needsWritePw = editMode === 'owner' && !writePassword.trim()
+    if (needsReadPw || needsWritePw) {
+      setShowPasswordWarning(true)
+      return
+    }
+    await doCreate(readPassword.trim(), writePassword.trim())
+  }
+
+  async function doCreate(effectiveReadPw, effectiveWritePw) {
     setSubmitting(true)
     const finalSlug = clipName.trim().replace(/\s+/g, '-').toLowerCase() || slug
 
@@ -102,9 +113,9 @@ export default function CreateForm({ slug, onCreated }) {
     const fileMeta = files.map(f => ({ id: f.id, filename: f.filename, mime_type: f.mimeType || f.file.type || 'application/octet-stream', size_bytes: f.size ?? f.file.size }))
     const payload = {
       text: text || null, language: effectiveLang || null, is_public: isPublic,
-      read_password: (!isPublic && readPassword.trim()) ? readPassword.trim() : undefined,
+      read_password: (!isPublic && effectiveReadPw) ? effectiveReadPw : undefined,
       edit_mode: editMode === 'none' ? 'read_only' : editMode === 'owner' ? 'password' : 'public',
-      write_password: (editMode === 'owner' && writePassword.trim()) ? writePassword.trim() : undefined,
+      write_password: (editMode === 'owner' && effectiveWritePw) ? effectiveWritePw : undefined,
       expires_in_seconds: expiresIn, files: fileMeta,
     }
     Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k])
@@ -114,15 +125,14 @@ export default function CreateForm({ slug, onCreated }) {
 
     if (files.length > 0) {
       setFiles(prev => prev.map(f => ({ ...f, status: 'uploading', progress: 0 })))
-      const wp = (editMode === 'owner' && writePassword.trim()) ? writePassword.trim() : null
       await Promise.all(files.map(async fi => {
-        const up = await uploadFile(finalSlug, fi.id, fi.file, p => setFiles(prev => prev.map(f => f.id === fi.id ? { ...f, progress: p, status: 'uploading' } : f)), wp)
+        const up = await uploadFile(finalSlug, fi.id, fi.file, p => setFiles(prev => prev.map(f => f.id === fi.id ? { ...f, progress: p, status: 'uploading' } : f)), effectiveWritePw || null)
         setFiles(prev => prev.map(f => f.id === fi.id ? { ...f, status: up.ok ? 'done' : 'error', progress: up.ok ? 100 : f.progress, errorMessage: up.error } : f))
       }))
     }
 
     setSubmitting(false)
-    onCreated(result.clip, (!isPublic && readPassword.trim()) ? readPassword.trim() : null)
+    onCreated(result.clip, (!isPublic && effectiveReadPw) ? effectiveReadPw : null)
   }
 
   return (
@@ -265,6 +275,39 @@ export default function CreateForm({ slug, onCreated }) {
         </div>
 
       </form>
+
+      {showPasswordWarning && (() => {
+        const finalSlug = clipName.trim().replace(/\s+/g, '-').toLowerCase() || slug
+        const needsReadPw = !isPublic && !readPassword.trim()
+        const needsWritePw = editMode === 'owner' && !writePassword.trim()
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', boxShadow: 'var(--shadow-sm)', padding: '28px', maxWidth: '420px', width: '90%' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '8px', color: 'var(--text)' }}>No password set</h3>
+              <p style={{ fontSize: '13px', color: 'var(--text-2)', marginBottom: '16px', lineHeight: 1.6 }}>
+                You haven't provided a password for:
+              </p>
+              <ul style={{ fontSize: '13px', color: 'var(--text)', marginBottom: '16px', paddingLeft: '18px', lineHeight: 1.8 }}>
+                {needsReadPw && <li>View access — will be set to <strong style={{ fontFamily: 'monospace' }}>{finalSlug}</strong></li>}
+                {needsWritePw && <li>Edit access — will be set to <strong style={{ fontFamily: 'monospace' }}>{finalSlug}</strong></li>}
+              </ul>
+              <p style={{ fontSize: '12px', color: 'var(--text-3)', marginBottom: '20px', lineHeight: 1.6 }}>
+                The cl1p name will be used as the password. Anyone who knows the cl1p name can access it.
+              </p>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button type="button"
+                  onClick={() => { setShowPasswordWarning(false); doCreate(needsReadPw ? finalSlug : readPassword.trim(), needsWritePw ? finalSlug : writePassword.trim()) }}
+                  style={{ flex: 1, padding: '9px 16px', background: '#000', color: '#fff', border: 'none', borderRadius: '6px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                >Yes I Agree</button>
+                <button type="button"
+                  onClick={() => setShowPasswordWarning(false)}
+                  style={{ flex: 1, padding: '9px 16px', background: 'transparent', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '6px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                >Let Me Change My Passwords</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }

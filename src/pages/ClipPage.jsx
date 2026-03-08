@@ -9,6 +9,12 @@ import PasswordModal from '../components/PasswordModal.jsx'
 
 export default function ClipPage() {
   const { slug } = useParams()
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768)
+  useEffect(() => {
+    function onResize() { setIsMobile(window.innerWidth < 768) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
   const [state, setState] = useState('loading')
   const [clip, setClip] = useState(null)
   const [readPassword, setReadPassword] = useState(null)
@@ -40,16 +46,16 @@ export default function ClipPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', padding: '32px 24px', maxWidth: '860px', margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', padding: isMobile ? '56px 16px 32px' : '32px 24px', maxWidth: '860px', margin: '0 auto' }}>
 
       {/* QR code + copy — only when clip exists, not on create form */}
       {state === 'exists' && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '28px' }}>
-          <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '10px', padding: '14px', display: 'inline-block' }}>
-            <QRCode value={window.location.href} size={140} />
+          <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: '10px', padding: '14px', width: isMobile ? '100%' : 'auto' }}>
+            <QRCode value={window.location.href} size={isMobile ? undefined : 140} style={{ width: isMobile ? '100%' : '140px', height: isMobile ? 'auto' : '140px', display: 'block' }} />
           </div>
           <button onClick={copyUrl}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', height: '38px', width: '168px', background: copied ? 'var(--success)' : '#000', color: '#fff', border: 'none', borderRadius: '8px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, cursor: 'pointer', transition: 'all 150ms', whiteSpace: 'nowrap' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', height: '38px', width: isMobile ? '100%' : '168px', background: copied ? 'var(--success)' : '#000', color: '#fff', border: 'none', borderRadius: '8px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, cursor: 'pointer', transition: 'all 150ms', whiteSpace: 'nowrap' }}
             onMouseEnter={e => { if (!copied) e.currentTarget.style.opacity = '0.85' }}
             onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
           >

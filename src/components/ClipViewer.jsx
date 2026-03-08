@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { FileText, Files, Globe, Lock, EyeOff, Pencil, KeyRound, Clock } from 'lucide-react'
 import FileCard from './FileCard.jsx'
@@ -24,6 +24,12 @@ const inputS = { display: 'block', width: '100%', height: '34px', background: 'v
 const onFI = e => e.target.style.borderColor = '#000'
 const onBI = e => e.target.style.borderColor = 'var(--border)'
 export default function ClipViewer({ clip, slug, readPassword = null, onRefresh }) {
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768)
+  useEffect(() => {
+    function onResize() { setIsMobile(window.innerWidth < 768) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
   const { text, language: initialLang, is_public, edit_mode, expires_at, files = [] } = clip
 
   const [copied, setCopied] = useState(false)
@@ -144,6 +150,55 @@ export default function ClipViewer({ clip, slug, readPassword = null, onRefresh 
 
       {saveError && <div style={{ background: 'rgba(220,38,38,0.06)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: '8px', padding: '10px 14px', fontSize: '13px' }}>⚠ {saveError}</div>}
 
+      {/* Files */}
+      {(hasFiles || isEditing) && (
+        <div style={card}>
+          <div style={cardTitle}>
+            <Files size={16} />
+            Files ({isEditing ? editFiles.filter(f => !f._deleted).length + newFiles.length : files.length})
+            <span style={{ fontSize: '13px', color: 'var(--text-3)', fontWeight: 400 }}>Click on any file to view or download</span>
+          </div>
+          {isEditing ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'grid', gap: '14px', gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                {editFiles.filter(f => !f._deleted).map(f => (
+                  <div key={f.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <FileCard file={{ ...f, filename: f._renamed }} slug={slug} readPassword={readPassword} hideActions />
+                    <input value={f._renamed} style={inputS} onFocus={onFI} onBlur={onBI}
+                      onChange={e => setEditFiles(prev => prev.map(x => x.id === f.id ? { ...x, _renamed: e.target.value } : x))} />
+                    <button style={{ height: '28px', background: 'rgba(220,38,38,0.06)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: '6px', fontFamily: 'inherit', fontSize: '11px', fontWeight: 500, cursor: 'pointer' }}
+                      onClick={() => setEditFiles(prev => prev.map(x => x.id === f.id ? { ...x, _deleted: true } : x))}>Remove</button>
+                  </div>
+                ))}
+                {newFiles.map(f => (
+                  <div key={f.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '8px', aspectRatio: '1/1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>📄</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{formatBytes(f.size_bytes)}</div>
+                    {f.status === 'uploading' && <Progress value={f.progress} />}
+                    <button style={{ height: '28px', background: 'rgba(220,38,38,0.06)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: '6px', fontFamily: 'inherit', fontSize: '11px', fontWeight: 500, cursor: 'pointer' }}
+                      onClick={() => setNewFiles(prev => prev.filter(x => x.id !== f.id))}>Remove</button>
+                  </div>
+                ))}
+              </div>
+              <div style={{ border: '2px dashed var(--border)', borderRadius: '8px', padding: '16px', textAlign: 'center', cursor: 'pointer', color: 'var(--text-3)', fontSize: '13px', transition: 'all 150ms' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#9ca3af'; e.currentTarget.style.color = 'var(--text)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-3)' }}
+                onDragOver={e => e.preventDefault()}
+                onDrop={e => { e.preventDefault(); addNewFiles(Array.from(e.dataTransfer?.files || [])) }}
+                onClick={() => document.getElementById('edit-file-input').click()}
+              >
+                + Drop or click to add files
+                <input id="edit-file-input" type="file" multiple style={{ display: 'none' }} onChange={e => addNewFiles(Array.from(e.target.files))} />
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)' }}>
+              {files.map(f => <FileCard key={f.id} file={f} slug={slug} readPassword={readPassword} />)}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Text / code */}
       {(hasText || isEditing) && (
         <div style={card}>
@@ -191,55 +246,6 @@ export default function ClipViewer({ clip, slug, readPassword = null, onRefresh 
           ) : (
             <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '14px 16px', maxHeight: '384px', overflowY: 'auto' }}>
               <pre style={{ margin: 0, fontFamily: 'monospace', fontSize: '13px', lineHeight: 1.65, whiteSpace: 'pre-wrap', color: 'var(--text)' }}>{text}</pre>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Files */}
-      {(hasFiles || isEditing) && (
-        <div style={card}>
-          <div style={cardTitle}>
-            <Files size={16} />
-            Files ({isEditing ? editFiles.filter(f => !f._deleted).length + newFiles.length : files.length})
-            <span style={{ fontSize: '13px', color: 'var(--text-3)', fontWeight: 400 }}>Click on any file to view or download</span>
-          </div>
-          {isEditing ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gap: '14px', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
-                {editFiles.filter(f => !f._deleted).map(f => (
-                  <div key={f.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <FileCard file={{ ...f, filename: f._renamed }} slug={slug} readPassword={readPassword} hideActions />
-                    <input value={f._renamed} style={inputS} onFocus={onFI} onBlur={onBI}
-                      onChange={e => setEditFiles(prev => prev.map(x => x.id === f.id ? { ...x, _renamed: e.target.value } : x))} />
-                    <button style={{ height: '28px', background: 'rgba(220,38,38,0.06)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: '6px', fontFamily: 'inherit', fontSize: '11px', fontWeight: 500, cursor: 'pointer' }}
-                      onClick={() => setEditFiles(prev => prev.map(x => x.id === f.id ? { ...x, _deleted: true } : x))}>Remove</button>
-                  </div>
-                ))}
-                {newFiles.map(f => (
-                  <div key={f.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '8px', aspectRatio: '1/1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>📄</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-3)' }}>{formatBytes(f.size_bytes)}</div>
-                    {f.status === 'uploading' && <Progress value={f.progress} />}
-                    <button style={{ height: '28px', background: 'rgba(220,38,38,0.06)', color: 'var(--danger)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: '6px', fontFamily: 'inherit', fontSize: '11px', fontWeight: 500, cursor: 'pointer' }}
-                      onClick={() => setNewFiles(prev => prev.filter(x => x.id !== f.id))}>Remove</button>
-                  </div>
-                ))}
-              </div>
-              <div style={{ border: '2px dashed var(--border)', borderRadius: '8px', padding: '16px', textAlign: 'center', cursor: 'pointer', color: 'var(--text-3)', fontSize: '13px', transition: 'all 150ms' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = '#9ca3af'; e.currentTarget.style.color = 'var(--text)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-3)' }}
-                onDragOver={e => e.preventDefault()}
-                onDrop={e => { e.preventDefault(); addNewFiles(Array.from(e.dataTransfer?.files || [])) }}
-                onClick={() => document.getElementById('edit-file-input').click()}
-              >
-                + Drop or click to add files
-                <input id="edit-file-input" type="file" multiple style={{ display: 'none' }} onChange={e => addNewFiles(Array.from(e.target.files))} />
-              </div>
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gap: '14px', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
-              {files.map(f => <FileCard key={f.id} file={f} slug={slug} readPassword={readPassword} />)}
             </div>
           )}
         </div>

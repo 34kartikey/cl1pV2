@@ -24,6 +24,13 @@ export default function FileCard({ file, slug, readPassword = null, hideActions 
   const isVideo = VIDEO_TYPES.includes(mime_type)
   const ext = filename.split('.').pop()?.toUpperCase() || ''
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768)
+  useEffect(() => {
+    function onResize() { setIsMobile(window.innerWidth < 768) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
   const [blobUrl, setBlobUrl] = useState(null)
   const [previewFailed, setPreviewFailed] = useState(false)
 
@@ -39,6 +46,50 @@ export default function FileCard({ file, slug, readPassword = null, hideActions 
     return () => { if (objectUrl) URL.revokeObjectURL(objectUrl) }
   }, [downloadUrl, readPassword])
 
+  /* ── Mobile: square card with buttons always visible ── */
+  if (isMobile && !hideActions) {
+    return (
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
+        {/* Square preview */}
+        <div style={{ position: 'relative', aspectRatio: '1/1', overflow: 'hidden', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {isImage && (blobUrl
+            ? <img src={blobUrl} alt={filename} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}><ImageIcon size={32} color="#9ca3af" /><span style={{ fontSize: '11px', color: 'var(--text-3)' }}>{previewFailed ? 'Preview failed' : 'Loading…'}</span></div>
+          )}
+          {isVideo && (blobUrl
+            ? <video src={blobUrl} preload="metadata" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}><Video size={32} color="#9ca3af" /><span style={{ fontSize: '11px', color: 'var(--text-3)' }}>{previewFailed ? 'Preview failed' : 'Loading…'}</span></div>
+          )}
+          {!isImage && !isVideo && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '16px' }}>
+              <FileIcon mimeType={mime_type} size={32} />
+              <span style={{ fontSize: '11px', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{ext} File</span>
+            </div>
+          )}
+        </div>
+        {/* Name */}
+        <div style={{ padding: '8px 10px 4px' }}>
+          <p style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={filename}>{filename}</p>
+          <p style={{ fontSize: '11px', color: 'var(--text-3)', marginTop: '2px' }}>{ext || mime_type?.split('/')[1] || 'file'}{size_bytes != null ? ` · ${formatBytes(size_bytes)}` : ''}</p>
+        </div>
+        {/* 50/50 buttons */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0', borderTop: '1px solid var(--border)', margin: '4px 0 0' }}>
+          {(isImage || isVideo) && blobUrl ? (
+            <button type="button" onClick={() => window.open(blobUrl, '_blank')}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '9px', background: 'transparent', border: 'none', borderRight: '1px solid var(--border)', cursor: 'pointer', fontSize: '12px', fontWeight: 500, color: 'var(--text)', fontFamily: 'inherit' }}
+            ><Eye size={13} />View</button>
+          ) : (
+            <div style={{ borderRight: '1px solid var(--border)' }} />
+          )}
+          <a href={downloadUrl} download={filename}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '9px', background: 'transparent', fontSize: '12px', fontWeight: 500, color: 'var(--text)', textDecoration: 'none' }}
+          ><Download size={13} />Save</a>
+        </div>
+      </div>
+    )
+  }
+
+  /* ── Desktop: square card ── */
   return (
     <div className="group"
       style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: 'var(--shadow-sm)', overflow: 'hidden', transition: 'box-shadow 200ms', position: 'relative' }}

@@ -148,7 +148,7 @@ export default function CreateForm({ slug, onCreated }) {
         {/* ── Basic Information ── */}
         <div style={card}>
           <h2 style={cardTitle}><Plus size={18} />Basic Information</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={label}>Cl1p Name *</label>
               <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden', background: 'var(--surface)', transition: 'box-shadow 150ms, border-color 150ms' }}

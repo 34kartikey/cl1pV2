@@ -6,7 +6,7 @@ export default function PrivacyPolicy() {
     { title: 'Cookies', desc: 'We may use cookies for basic site functionality and analytics.' },
     { title: 'Third-Party Services', desc: 'We use Google Analytics and AdSense. These services may collect anonymous usage data as described in their own privacy policies.' },
     { title: 'Contact', desc: (
-      <>For privacy concerns, contact <a href="mailto:kartikvaghasiya4477@gmail.com" style={{ color: '#2563eb', textDecoration: 'underline' }}>kartikvaghasiya4477@gmail.com</a>.</>
+      <>For privacy concerns, contact <a href="mailto:34kartikey@gmail.com" style={{ color: '#2563eb', textDecoration: 'underline' }}>34kartikey@gmail.com</a>.</>
     )},
   ]
 

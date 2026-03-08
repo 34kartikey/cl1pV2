@@ -54,6 +54,13 @@ const SegmentControl = ({ options, value, onChange }) => (
 )
 
 export default function CreateForm({ slug, onCreated }) {
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 640)
+  useEffect(() => {
+    function onResize() { setIsMobile(window.innerWidth < 640) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
   const [clipName, setClipName] = useState(slug)
   const [isPublic, setIsPublic] = useState(true)
   const [readPassword, setReadPassword] = useState('')
@@ -141,7 +148,7 @@ export default function CreateForm({ slug, onCreated }) {
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto' }}>
       {/* Page title */}
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '32px', paddingTop: isMobile ? '48px' : '0' }}>
         <h1 style={{ fontSize: '26px', fontWeight: 700, marginBottom: '8px', letterSpacing: '-0.02em' }}>Create New Cl1p</h1>
         <p style={{ fontSize: '14px', color: 'var(--text-2)' }}>Share your files and text with a unique link</p>
       </div>
@@ -165,7 +172,7 @@ export default function CreateForm({ slug, onCreated }) {
                 />
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
               <div style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '8px', padding: '14px' }}>
                 <label style={label}>Who can view?</label>
                 <SegmentControl

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Plus, Lock, Upload } from 'lucide-react'
 
@@ -18,7 +18,14 @@ const inputStyle = {
 
 export default function Landing() {
   const [slug, setSlug] = useState('')
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    function onResize() { setIsMobile(window.innerWidth < 768) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -28,7 +35,7 @@ export default function Landing() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', padding: '48px 16px' }}>
+    <div style={{ minHeight: '100vh', padding: isMobile ? '64px 16px 48px' : '48px 16px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '48px' }}>
 
         {/* Hero */}

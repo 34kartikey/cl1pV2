@@ -41,25 +41,25 @@ export default function Landing() {
 
         {/* Search card */}
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div style={{ width: '100%', maxWidth: '400px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: 'var(--shadow-sm)', padding: '24px' }}>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ width: '100%', maxWidth: '500px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', boxShadow: 'var(--shadow)', padding: '28px' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px' }}>Cl1p Name</label>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '9px' }}>Cl1p Name</label>
                 <input
                   type="text" placeholder="Enter cl1p name" value={slug} required
                   onChange={e => setSlug(e.target.value)}
                   autoFocus autoComplete="off" spellCheck={false}
-                  style={inputStyle}
+                  style={{ ...inputStyle, padding: '12px 14px', fontSize: '15px', fontWeight: 500, borderRadius: '7px' }}
                   onFocus={e => { e.target.style.boxShadow = '0 0 0 2px rgba(0,0,0,0.12)'; e.target.style.borderColor = '#000' }}
                   onBlur={e => { e.target.style.boxShadow = 'none'; e.target.style.borderColor = 'var(--border)' }}
                 />
               </div>
               <button type="submit"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '9px 16px', background: '#000', color: '#fff', border: 'none', borderRadius: '6px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 500, cursor: 'pointer', transition: 'opacity 150ms' }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '12px 16px', background: '#000', color: '#fff', border: 'none', borderRadius: '7px', fontFamily: 'inherit', fontSize: '15px', fontWeight: 600, cursor: 'pointer', transition: 'opacity 150ms' }}
                 onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}
               >
-                <Search size={15} />
+                <Search size={16} />
                 Search Or Create
               </button>
             </form>

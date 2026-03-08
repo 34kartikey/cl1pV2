@@ -22,11 +22,13 @@ export default function Sidebar() {
   function go(path) { navigate(path); setOpen(false) }
 
   const sidebarStyle = {
-    width: '256px',
-    minWidth: '256px',
+    width: '220px',
+    minWidth: '220px',
     minHeight: '100vh',
-    background: 'var(--surface)',
-    borderRight: '1px solid var(--border)',
+    background: 'rgba(255,255,255,0.6)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    borderRight: '1px solid rgba(0,0,0,0.07)',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -37,7 +39,7 @@ export default function Sidebar() {
       zIndex: 40,
       transform: open ? 'translateX(0)' : 'translateX(-100%)',
       transition: 'transform 220ms cubic-bezier(0.4,0,0.2,1)',
-    } : { position: 'relative' }),
+    } : { position: 'sticky', top: 0, height: '100vh' }),
   }
 
   const linkStyle = {
@@ -48,12 +50,14 @@ export default function Sidebar() {
     transition: 'background 150ms',
   }
 
+  const linkHoverBg = 'rgba(0,0,0,0.05)'
+
   return (
     <>
       {/* Mobile hamburger */}
       {isMobile && !open && (
         <button onClick={() => setOpen(true)} aria-label="Open menu"
-          style={{ position: 'fixed', top: '12px', left: '12px', zIndex: 50, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '99px', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-sm)' }}
+          style={{ position: 'fixed', top: '12px', left: '12px', zIndex: 50, background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '99px', padding: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-sm)' }}
         >
           <Menu size={20} color="#374151" />
         </button>
@@ -86,7 +90,7 @@ export default function Sidebar() {
               { label: 'Privacy Policy', path: '/privacy-policy' },
             ].map(item => (
               <button key={item.path} style={linkStyle} onClick={() => go(item.path)}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
+                onMouseEnter={e => e.currentTarget.style.background = linkHoverBg}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >{item.label}</button>
             ))}

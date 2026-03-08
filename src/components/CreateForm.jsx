@@ -14,8 +14,11 @@ const EXPIRY_OPTIONS = [
 
 /* ── shared styles ── */
 const card = {
-  background: 'var(--surface)', border: '1px solid var(--border)',
-  borderRadius: '8px', boxShadow: 'var(--shadow-sm)', padding: '24px', marginBottom: '0',
+  background: 'rgba(255,255,255,0.6)',
+  backdropFilter: 'blur(16px)',
+  WebkitBackdropFilter: 'blur(16px)',
+  border: '1px solid rgba(0,0,0,0.07)',
+  borderRadius: '12px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', padding: '24px', marginBottom: '0',
 }
 const cardTitle = {
   fontSize: '15px', fontWeight: 600, marginBottom: '20px',
@@ -148,8 +151,8 @@ export default function CreateForm({ slug, onCreated }) {
         {/* ── Basic Information ── */}
         <div style={card}>
           <h2 style={cardTitle}><Plus size={18} />Basic Information</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-            <div style={{ gridColumn: '1 / -1' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
               <label style={label}>Cl1p Name *</label>
               <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden', background: 'var(--surface)', transition: 'box-shadow 150ms, border-color 150ms' }}
                 onFocusCapture={e => { e.currentTarget.style.boxShadow = '0 0 0 2px rgba(0,0,0,0.1)'; e.currentTarget.style.borderColor = '#000' }}
@@ -162,31 +165,33 @@ export default function CreateForm({ slug, onCreated }) {
                 />
               </div>
             </div>
-            <div>
-              <label style={label}>Who can view?</label>
-              <SegmentControl
-                options={[{ label: 'Anyone', value: true }, { label: 'Password only', value: false }]}
-                value={isPublic} onChange={setIsPublic}
-              />
-              {!isPublic && (
-                <div style={{ position: 'relative', marginTop: '10px' }}>
-                  <input type={showReadPw ? 'text' : 'password'} placeholder="View password (required to open this cl1p)" value={readPassword} onChange={e => setReadPassword(e.target.value)} autoComplete="new-password" style={{ ...inputS, padding: '8px 40px 8px 12px' }} onFocus={onFI} onBlur={onBI} />
-                  <button type="button" onClick={() => setShowReadPw(v => !v)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', display: 'flex', padding: 0 }}>{showReadPw ? <EyeOff size={15} /> : <Eye size={15} />}</button>
-                </div>
-              )}
-            </div>
-            <div>
-              <label style={label}>Who can edit?</label>
-              <SegmentControl
-                options={[{ label: 'No one', value: 'none' }, { label: 'Anyone', value: 'public' }, { label: 'With password', value: 'owner' }]}
-                value={editMode} onChange={setEditMode}
-              />
-              {editMode === 'owner' && (
-                <div style={{ position: 'relative', marginTop: '10px' }}>
-                  <input type={showWritePw ? 'text' : 'password'} placeholder="Edit password (required to make changes)" value={writePassword} onChange={e => setWritePassword(e.target.value)} autoComplete="new-password" style={{ ...inputS, padding: '8px 40px 8px 12px' }} onFocus={onFI} onBlur={onBI} />
-                  <button type="button" onClick={() => setShowWritePw(v => !v)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', display: 'flex', padding: 0 }}>{showWritePw ? <EyeOff size={15} /> : <Eye size={15} />}</button>
-                </div>
-              )}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '8px', padding: '14px' }}>
+                <label style={label}>Who can view?</label>
+                <SegmentControl
+                  options={[{ label: 'Anyone', value: true }, { label: 'Password only', value: false }]}
+                  value={isPublic} onChange={setIsPublic}
+                />
+                {!isPublic && (
+                  <div style={{ position: 'relative', marginTop: '10px' }}>
+                    <input type={showReadPw ? 'text' : 'password'} placeholder="View password" value={readPassword} onChange={e => setReadPassword(e.target.value)} autoComplete="new-password" style={{ ...inputS, padding: '8px 40px 8px 12px' }} onFocus={onFI} onBlur={onBI} />
+                    <button type="button" onClick={() => setShowReadPw(v => !v)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', display: 'flex', padding: 0 }}>{showReadPw ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+                  </div>
+                )}
+              </div>
+              <div style={{ background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '8px', padding: '14px' }}>
+                <label style={label}>Who can edit?</label>
+                <SegmentControl
+                  options={[{ label: 'No one', value: 'none' }, { label: 'Anyone', value: 'public' }, { label: 'With password', value: 'owner' }]}
+                  value={editMode} onChange={setEditMode}
+                />
+                {editMode === 'owner' && (
+                  <div style={{ position: 'relative', marginTop: '10px' }}>
+                    <input type={showWritePw ? 'text' : 'password'} placeholder="Edit password" value={writePassword} onChange={e => setWritePassword(e.target.value)} autoComplete="new-password" style={{ ...inputS, padding: '8px 40px 8px 12px' }} onFocus={onFI} onBlur={onBI} />
+                    <button type="button" onClick={() => setShowWritePw(v => !v)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', display: 'flex', padding: 0 }}>{showWritePw ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

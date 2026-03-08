@@ -1,3 +1,5 @@
+import { checkStorageCapacity } from '../../../_utils.js';
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': 'https://cl1p.in',
   'Access-Control-Allow-Methods': 'GET, PUT, PATCH, DELETE, OPTIONS',
@@ -140,6 +142,10 @@ export async function onRequestPut({ params, env, request }) {
     if (!provided) return err('Write password required', 401);
     if (await hashPassword(provided) !== clip.write_password) return err('Invalid write password', 401);
   }
+
+  // Check global storage capacity before accepting the upload
+  const capacityError = await checkStorageCapacity(env);
+  if (capacityError) return capacityError;
 
   // File size limit: 50 MB per file
   const contentLengthHeader = request.headers.get('Content-Length');

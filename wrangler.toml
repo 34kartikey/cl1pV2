@@ -12,6 +12,16 @@ database_id = "13fbb1e9-bb76-4345-9a21-235dfb0fa6c3"
 binding = "FILES"
 bucket_name = "cl1p-files"
 
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+# Run: wrangler kv namespace create RATE_LIMIT
+# Then replace the id above with the output ID.
+
 # Admin secrets — set via Cloudflare dashboard → Pages → cl1p → Settings → Variables and Secrets
 # or run:  wrangler pages secret put ADMIN_PASSWORD
 #          wrangler pages secret put ADMIN_SECRET
+
+# Optional env vars (set in Cloudflare dashboard or .dev.vars for local dev):
+#   RATE_LIMIT_WRITES_PER_MIN = 20   (default: 20 write requests per IP per minute)
+#   MAX_STORAGE_BYTES = 5368709120   (default: 5 GB)

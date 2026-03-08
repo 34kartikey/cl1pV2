@@ -1,3 +1,5 @@
+import { checkStorageCapacity } from '../../_utils.js';
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': 'https://cl1p.in',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -92,6 +94,10 @@ export async function onRequestPost({ params, env, request }) {
   if (!fileId || !filename) {
     return err('fileId and filename are required', 400);
   }
+
+  // Check global storage capacity before accepting any new file
+  const capacityError = await checkStorageCapacity(env);
+  if (capacityError) return capacityError;
 
   // Enforce 50 MB total per clip
   const totalRow = await env.DB.prepare(

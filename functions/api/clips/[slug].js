@@ -1,3 +1,5 @@
+import { checkStorageCapacity } from '../_utils.js';
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': 'https://cl1p.in',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -108,6 +110,10 @@ export async function onRequestPost({ params, env, request }) {
   if (!slug || slug.length > 100 || !/^[a-zA-Z0-9_-]+$/.test(slug)) {
     return err('Invalid slug. Use 1-100 alphanumeric characters, hyphens, or underscores.', 400);
   }
+
+  // Check storage capacity before creating
+  const capacityError = await checkStorageCapacity(env);
+  if (capacityError) return capacityError;
 
   // Check if clip already exists
   const existing = await env.DB.prepare('SELECT slug FROM clips WHERE slug = ?')

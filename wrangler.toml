@@ -14,7 +14,7 @@ bucket_name = "cl1p-files"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "acee7f477b0645279a8af7bfdf4ef8a2"
 # Run: wrangler kv namespace create RATE_LIMIT
 # Then replace the id above with the output ID.
 

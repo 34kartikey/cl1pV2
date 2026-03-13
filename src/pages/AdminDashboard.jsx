@@ -24,46 +24,6 @@ function expiryStatus(unix) {
   return { label: 'Active', color: '#16a34a', bg: 'rgba(22,163,74,0.08)' }
 }
 
-/* ── Bar Chart ── */
-function BarChart({ data }) {
-  const [tooltip, setTooltip] = useState(null)
-  if (!data.length) return <div style={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: '13px' }}>No data for this period</div>
-
-  const max = Math.max(...data.map(d => d.count), 1)
-  const showEvery = Math.ceil(data.length / 12)
-
-  return (
-    <div style={{ position: 'relative' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '160px', padding: '0 2px' }}>
-        {data.map((d, i) => {
-          const pct = (d.count / max) * 100
-          return (
-            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0', height: '100%', justifyContent: 'flex-end', position: 'relative' }}
-              onMouseEnter={() => setTooltip({ i, day: d.day, count: d.count })}
-              onMouseLeave={() => setTooltip(null)}
-            >
-              {tooltip?.i === i && (
-                <div style={{ position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)', background: '#111', color: '#fff', borderRadius: '5px', padding: '4px 8px', fontSize: '11px', whiteSpace: 'nowrap', zIndex: 10, marginBottom: '6px', pointerEvents: 'none' }}>
-                  {d.day}: <strong>{d.count}</strong>
-                </div>
-              )}
-              <div style={{ width: '100%', background: tooltip?.i === i ? '#374151' : '#000', borderRadius: '3px 3px 0 0', height: `${Math.max(pct, d.count > 0 ? 4 : 0)}%`, transition: 'background 100ms' }} />
-            </div>
-          )
-        })}
-      </div>
-      {/* X axis labels */}
-      <div style={{ display: 'flex', gap: '3px', padding: '6px 2px 0', overflow: 'hidden' }}>
-        {data.map((d, i) => (
-          <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: '9px', color: 'var(--text-3)', overflow: 'hidden' }}>
-            {i % showEvery === 0 ? d.day.slice(5) : ''}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 /* ── Clip Detail Modal ── */
 function ClipModal({ slug, token, onClose }) {
   const [clip, setClip] = useState(null)
@@ -173,7 +133,6 @@ export default function AdminDashboard() {
   const token = getToken()
 
   const [stats, setStats] = useState(null)
-  const [chartDays, setChartDays] = useState(7)
   const [clips, setClips] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(0)
@@ -190,9 +149,9 @@ export default function AdminDashboard() {
     if (!isTokenValid(token)) { navigate('/admin/login'); return }
   }, [token, navigate])
 
-  const loadStats = useCallback(async (days) => {
+  const loadStats = useCallback(async () => {
     setLoadingStats(true)
-    const r = await fetchStats(token, days)
+    const r = await fetchStats(token)
     setLoadingStats(false)
     if (r.unauthorized) { clearToken(); navigate('/admin/login'); return }
     if (r.ok) setStats(r.data)
@@ -206,7 +165,7 @@ export default function AdminDashboard() {
     if (r.ok) { setClips(r.data.clips); setTotal(r.data.total); setPage(r.data.page); setPages(r.data.pages) }
   }, [token, navigate])
 
-  useEffect(() => { loadStats(chartDays) }, [chartDays, loadStats])
+  useEffect(() => { loadStats() }, [loadStats])
   useEffect(() => { loadClips(0, search) }, [search, loadClips])
 
   async function handleDelete(slug) {
@@ -215,7 +174,7 @@ export default function AdminDashboard() {
     const r = await deleteClip(token, slug)
     setDeletingSlug(null)
     if (r.unauthorized) { clearToken(); navigate('/admin/login'); return }
-    if (r.ok) { loadClips(page, search); loadStats(chartDays) }
+    if (r.ok) { loadClips(page, search); loadStats() }
   }
 
   function handleSearch(e) {
@@ -246,9 +205,10 @@ export default function AdminDashboard() {
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
         {/* Stats Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
           {[
-            { label: 'Total Clips', value: stats?.summary.total ?? '—', color: '#000' },
+            { label: 'Total Ever', value: stats?.summary.total_ever ?? '—', color: '#000' },
+            { label: 'Current', value: stats?.summary.total ?? '—', color: '#374151' },
             { label: 'Active', value: stats?.summary.active ?? '—', color: '#16a34a' },
             { label: 'Expired', value: stats?.summary.expired ?? '—', color: '#dc2626' },
           ].map(s => (
@@ -259,26 +219,6 @@ export default function AdminDashboard() {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Chart */}
-        <div style={card}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <span style={{ fontSize: '15px', fontWeight: 600 }}>Clips Created</span>
-            <select value={chartDays} onChange={e => setChartDays(Number(e.target.value))}
-              style={{ height: '32px', padding: '0 10px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--surface)', color: 'var(--text)', fontFamily: 'inherit', fontSize: '12px', outline: 'none', cursor: 'pointer' }}
-              onFocus={e => e.target.style.borderColor = '#000'} onBlur={e => e.target.style.borderColor = 'var(--border)'}
-            >
-              <option value={7}>Last 7 days</option>
-              <option value={30}>Last 30 days</option>
-              <option value={90}>Last 90 days</option>
-              <option value={0}>All time</option>
-            </select>
-          </div>
-          {loadingStats
-            ? <div style={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: '13px' }}>Loading…</div>
-            : <BarChart data={stats?.daily || []} />
-          }
         </div>
 
         {/* Clips Table */}

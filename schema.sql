@@ -21,3 +21,9 @@ CREATE TABLE clip_files (
 );
 
 CREATE INDEX idx_clips_expires_at ON clips(expires_at);
+
+CREATE TABLE meta (
+  key   TEXT PRIMARY KEY,
+  value INTEGER NOT NULL DEFAULT 0
+);
+-- Seed: INSERT OR IGNORE INTO meta (key, value) SELECT 'total_clips_created', COUNT(*) FROM clips;

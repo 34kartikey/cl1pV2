@@ -8,7 +8,7 @@ export async function onRequestGet({ request, env }) {
   const days = parseInt(url.searchParams.get('days') || '7')
   const since = days === 0 ? 0 : Math.floor(Date.now() / 1000) - days * 86400
 
-  const [total, active, expired, daily] = await Promise.all([
+  const [total, active, expired, daily, totalEver] = await Promise.all([
     env.DB.prepare('SELECT COUNT(*) as n FROM clips').first(),
     env.DB.prepare('SELECT COUNT(*) as n FROM clips WHERE expires_at IS NULL OR expires_at > unixepoch()').first(),
     env.DB.prepare('SELECT COUNT(*) as n FROM clips WHERE expires_at IS NOT NULL AND expires_at <= unixepoch()').first(),
@@ -17,6 +17,7 @@ export async function onRequestGet({ request, env }) {
        FROM clips WHERE created_at >= ?
        GROUP BY day ORDER BY day ASC`
     ).bind(since).all(),
+    env.DB.prepare(`SELECT value FROM meta WHERE key = 'total_clips_created'`).first(),
   ])
 
   return json({
@@ -26,6 +27,7 @@ export async function onRequestGet({ request, env }) {
         total: total?.n || 0,
         active: active?.n || 0,
         expired: expired?.n || 0,
+        total_ever: totalEver?.value || 0,
       },
       daily: daily.results || [],
     },

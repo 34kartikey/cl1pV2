@@ -182,6 +182,10 @@ export async function onRequestPost({ params, env, request }) {
     )
     .run();
 
+  await env.DB.prepare(
+    `UPDATE meta SET value = value + 1 WHERE key = 'total_clips_created'`
+  ).run();
+
   // Insert file metadata if provided
   if (files.length > 0) {
     for (const file of files) {

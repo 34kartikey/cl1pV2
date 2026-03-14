@@ -102,35 +102,34 @@ export default function ClipViewer({ clip, slug, readPassword = null, onRefresh 
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
       {/* Meta */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flex: 1 }}>
-          {[
-            { icon: is_public ? Globe : Lock, label: is_public ? 'Public' : 'Private' },
-            edit_mode === 'read_only'
-              ? { icon: EyeOff, label: 'Read-only' }
-              : edit_mode === 'public'
-              ? { icon: Pencil, label: 'Anyone can edit' }
-              : { icon: KeyRound, label: 'Owner edit' },
-            formatExpiry(expires_at) ? { icon: Clock, label: formatExpiry(expires_at) } : null,
-          ].filter(Boolean).map(({ icon: Icon, label }, i) => (
-            <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#374151', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '5px 12px', fontWeight: 600 }}>
-              <Icon size={13} strokeWidth={2} />{label}
-            </span>
-          ))}
-        </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {[
+          { icon: is_public ? Globe : Lock, label: is_public ? 'Public' : 'Private' },
+          edit_mode === 'read_only'
+            ? { icon: EyeOff, label: 'Read-only' }
+            : edit_mode === 'public'
+            ? { icon: Pencil, label: 'Anyone can edit' }
+            : { icon: KeyRound, label: 'Owner edit' },
+          formatExpiry(expires_at) ? { icon: Clock, label: formatExpiry(expires_at) } : null,
+        ].filter(Boolean).map(({ icon: Icon, label }, i) => (
+          <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#374151', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '5px 12px', fontWeight: 600, ...(isMobile ? { width: '100%' } : { alignSelf: 'flex-start' }) }}>
+            <Icon size={13} strokeWidth={2} />{label}
+          </span>
+        ))}
         {canEdit && !isEditing && (
-          <button style={btnOutline} onClick={() => { if (needsPassword && !isUnlocked) { setShowWriteModal(true); return; } enterEditMode() }}
+          <button style={{ ...btnOutline, ...(isMobile ? { width: '100%', padding: '8px 14px' } : { alignSelf: 'flex-start' }) }}
+            onClick={() => { if (needsPassword && !isUnlocked) { setShowWriteModal(true); return; } enterEditMode() }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#000'; e.currentTarget.style.color = '#000' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = '#374151' }}
           >Edit</button>
         )}
         {isEditing && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button style={btnOutline} onClick={handleCancel} disabled={saving}
+          <div style={{ display: 'flex', gap: '8px', ...(isMobile ? { width: '100%' } : { alignSelf: 'flex-start' }) }}>
+            <button style={{ ...btnOutline, ...(isMobile ? { flex: 1, padding: '8px 14px' } : {}) }} onClick={handleCancel} disabled={saving}
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#000'; e.currentTarget.style.color = '#000' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = '#374151' }}
             >Cancel</button>
-            <button style={{ ...btnOutline, background: '#000', color: '#fff', border: 'none', opacity: saving ? 0.5 : 1 }} onClick={handleSave} disabled={saving}
+            <button style={{ ...btnOutline, background: '#000', color: '#fff', border: 'none', opacity: saving ? 0.5 : 1, ...(isMobile ? { flex: 1, padding: '8px 14px' } : {}) }} onClick={handleSave} disabled={saving}
               onMouseEnter={e => { if (!saving) e.currentTarget.style.opacity = '0.85' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = saving ? '0.5' : '1' }}
             >{saving ? 'Saving…' : 'Save'}</button>
@@ -160,7 +159,7 @@ export default function ClipViewer({ clip, slug, readPassword = null, onRefresh 
           </div>
           {isEditing ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gap: '14px', gridTemplateColumns: 'repeat(3, 1fr)' }}>
+              <div style={{ display: 'grid', gap: '14px', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)' }}>
                 {editFiles.filter(f => !f._deleted).map(f => (
                   <div key={f.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <FileCard file={{ ...f, filename: f._renamed }} slug={slug} readPassword={readPassword} hideActions />
